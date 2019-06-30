@@ -1,0 +1,429 @@
+{
+  "$id": "http://symfony.com/schema/dic/services#",
+  "title": "Symfony Services YAML Schema",
+  "definitions": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "nullableString": {
+      "type": ["string", "null"]
+    },
+    "scalarType": {
+      "type": ["string", "boolean", "integer", "number", "null"]
+    },
+    "serviceBooleanOption": {
+      "type": ["boolean", "string"],
+      "title": "boolean"
+    },
+    "servicePublic": {
+      "$ref": "#/definitions/serviceBooleanOption",
+      "title": "boolean",
+      "x-intellij-html-description": "Whether the service can be accessed with <code>$container-&gt;get(...)</code> (public) or only via injection (private).<br><a href='https://symfony.com/doc/current/service_container.html#public-versus-private-services'>Symfony Documentation</a>"
+    },
+    "serviceTags": {
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "name": {
+                "$ref": "#/definitions/nonEmptyString",
+                "title": "string",
+                "x-intellij-html-description": "Name of the service tag.<br><a href='https://symfony.com/doc/current/service_container/tags.html'>Symfony Documentation</a>"
+              },
+              "alias": {
+                "$ref": "#/definitions/nonEmptyString",
+                "title": "string",
+                "x-intellij-html-description": "Alias attribute on service tag.<br><a href='https://symfony.com/doc/current/service_container/tags.html#adding-additional-attributes-on-tags'>Symfony Documentation</a>"
+              },
+              "priority": {
+                "type": "number",
+                "title": "number",
+                "x-intellij-html-description": "Prioritize this in collected services.<br><a href='https://symfony.com/doc/current/service_container/tags.html#reference-tagged-services'>Symfony Documentation</a>"
+              }
+            },
+            "required": ["name"],
+            "additionalProperties": {
+              "$ref": "#/definitions/scalarType"
+            }
+          }
+        ]
+      }
+    },
+    "serviceCallable": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2
+        }
+      ]
+    },
+    "serviceMethodCalls": {
+      "anyOf": [
+        {
+          "type": "array"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "type": "string"
+            },
+            "arguments": {
+              "type": "array"
+            },
+            "returns_clone": {
+              "$ref": "#/definitions/serviceBooleanOption",
+              "x-intellij-html-description": "Set to true for 'wither methods' (immutable class) which return a clone of the object.<br><i>Since Symfony 4.3</i>"
+            }
+          }
+        }
+      ]
+    },
+    "serviceArgumentsBind": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "$comment": "PHP type and variables syntax (Since Symfony 4.2: by type AND name)",
+        "pattern": "^(\\$[a-zA-Z_\\x7f-\\xff][a-zA-Z0-9_\\x7f-\\xff]*|[a-zA-Z\\\\_\\x7f-\\xff][a-zA-Z0-9_\\x7f-\\xff]*|[a-zA-Z\\\\_\\x7f-\\xff][a-zA-Z0-9_\\x7f-\\xff]* \\$[a-zA-Z_\\x7f-\\xff][a-zA-Z0-9_\\x7f-\\xff]*)",
+        "x-intellij-html-description": "Service argument"
+      }
+    },
+    "serviceArguments": {
+      "anyOf": [
+        {
+          "type": "array",
+          "additionalItems": {
+            "$comment": "Since Symfony 4.3",
+            "type": "object",
+            "properties": {
+              "tag": {
+                "type": "string",
+                "title": "string",
+                "x-intellij-html-description": "Inject all services tagged with this tag name."
+              },
+              "index_by": {
+                "type": "string",
+                "title": "string",
+                "x-intellij-html-description": "Use the value of the specified tag attribute to index the services.<br><i><a href='https://symfony.com/blog/new-in-symfony-4-3-indexed-and-tagged-service-collections'>Since Symfony 4.3</a></i>"
+              },
+              "default_index_method": {
+                "type": "string",
+                "title": "string",
+                "x-intellij-html-description": "Name of the static method returning the array key for service tag.<br><i><a href='https://symfony.com/blog/new-in-symfony-4-3-indexed-and-tagged-service-collections'>Since Symfony 4.3</a></i>"
+              }
+            }
+          }
+        },
+        {
+          "$ref": "#/definitions/serviceArgumentsBind"
+        }
+      ]
+    },
+    "serviceProperties": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "$comment": "PHP fields syntax",
+        "pattern": "^[a-zA-Z_\\x7f-\\xff][a-zA-Z0-9_\\x7f-\\xff]*"
+      }
+    }
+  },
+  "type": "object",
+  "properties": {
+    "imports": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "resource": {
+            "$ref": "#/definitions/nonEmptyString",
+            "title": "string",
+            "x-intellij-html-description": "Relative path to other services file to be loaded.<br><a href='https://symfony.com/doc/current/configuration.html#importing-configuration-files'>Symfony Documentation</a>",
+            "examples": [
+              "services/mailer.yaml"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "yaml",
+              "yml",
+              "xml",
+              "php",
+              "ini",
+              "glob",
+              "directory"
+            ]
+          },
+          "ignore_errors": {
+            "type": "boolean",
+            "default": false,
+            "title": "boolean",
+            "x-intellij-html-description": "Silently discards errors if the loaded file doesn't exist.<br><a href='https://symfony.com/doc/current/configuration.html#importing-configuration-files'>Symfony Documentation</a>"
+          }
+        },
+        "default": {},
+        "required": [
+          "resource"
+        ],
+        "additionalProperties": false
+      },
+      "uniqueItems": true
+    },
+    "parameters": {
+      "type": "object"
+    },
+    "services": {
+      "type": "object",
+      "properties": {
+        "_defaults": {
+          "$comment": "Since Symfony 3.3",
+          "type": "object",
+          "properties": {
+            "autowire": {
+              "$ref": "#/definitions/serviceBooleanOption",
+              "x-intellij-html-description": "Autowiring automatically injects dependencies for all services in this file.<br><a href='https://symfony.com/doc/current/service_container/autowiring.html'>Symfony Documentation</a><br><i><a href='https://symfony.com/doc/master/service_container/3.3-di-changes.html#autowiring-by-default-use-type-hint-instead-of-service-id'>Since Symfony 3.3</a></i>"
+            },
+            "autoconfigure": {
+              "$ref": "#/definitions/serviceBooleanOption",
+              "x-intellij-html-description": "Autoconfigure automatically tags all services in this file based on interface implementations.<br><a href='https://symfony.com/doc/current/service_container.html#the-autoconfigure-option'>Symfony Documentation</a><br><i><a href='https://symfony.com/blog/new-in-symfony-3-3-service-autoconfiguration'>Since Symfony 3.3</a></i>"
+            },
+            "tags": {
+              "$ref": "#/definitions/serviceTags"
+            },
+            "public": {
+              "$ref": "#/definitions/servicePublic"
+            },
+            "bind": {
+              "$ref": "#/definitions/serviceArgumentsBind",
+              "title": "object",
+              "x-intellij-html-description": "Local service binding<br><i><a href='https://symfony.com/blog/new-in-symfony-3-4-local-service-binding'>Since Symfony 3.4</a></i>"
+            }
+          },
+          "additionalProperties": false,
+          "title": "object",
+          "x-intellij-html-description": "Default options for all services in this file.<br><a href='https://symfony.com/doc/current/service_container/3.3-di-changes.html#the-new-default-services-yaml-file'>Symfony Documentation</a><br><i><a href='https://symfony.com/blog/new-in-symfony-3-3-simpler-service-configuration#default-service-configuration'>Since Symfony 3.3</a></i>"
+        },
+        "_instanceof": {
+          "$comment": "Since Symfony 3.3",
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "tags": {
+                "$ref": "#/definitions/serviceTags"
+              },
+              "public": {
+                "$ref": "#/definitions/servicePublic"
+              }
+            }
+          },
+          "title": "object",
+          "x-intellij-html-description": "Default options for all services which implement specified interface.<br><a href='https://symfony.com/doc/current/service_container/3.3-di-changes.html#auto-configure-with-instanceof'>Symfony Documentation</a><br><i><a href='https://symfony.com/blog/new-in-symfony-3-3-simpler-service-configuration#interface-based-service-configuration'>Since Symfony 3.3</a></i>"
+        }
+      },
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "$comment": "short @service alias syntax",
+            "type": "string",
+            "pattern": "^@.+"
+          },
+          {
+            "$comment": "short syntax with arguments as array (Since Symfony 3.3: https://symfony.com/blog/new-in-symfony-3-3-simpler-service-configuration#short-syntax-for-service-configuration)",
+            "type": "array"
+          },
+          {
+            "$comment": "short syntax with class as service name",
+            "type": "null",
+            "enum": ["null", "~"]
+          },
+          {
+            "$comment": "standard service syntax",
+            "type": "object",
+            "properties": {
+              "alias": {
+                "type": "string"
+              },
+              "deprecated": {
+                "$comment": "Since Symfony 2.8",
+                "type": ["string", "boolean", "null"],
+                "title": "string | null",
+                "x-intellij-html-description": "Marks service as deprecated.<br><a href='https://symfony.com/doc/current/service_container/alias_private.html#deprecating-services'>Symfony Documentation</a><br><i><a href='https://symfony.com/blog/new-in-symfony-2-8-deprecated-service-definitions'>Since Symfony 2.8</a></i><br><i><a href='https://symfony.com/blog/new-in-symfony-4-3-deprecating-service-aliases'>Since Symfony 4.3</a> also for service aliases</i>"
+              },
+              "public": {
+                "$ref": "#/definitions/servicePublic"
+              }
+            },
+            "if": {
+              "$comment": "service alias not empty",
+              "not": {
+                "properties": {
+                  "alias": {
+                    "pattern": "^$"
+                  }
+                }
+              }
+            },
+            "then": {
+              "$comment": "only 'alias' and 'public' keys allowed",
+              "properties": {
+                "alias": {
+                  "$ref": "#/definitions/nonEmptyString"
+                },
+                "deprecated": {},
+                "public": {}
+              },
+              "additionalProperties": false
+            },
+            "else": {
+              "properties": {
+                "autowire": {
+                  "$comment": "Since Symfony 2.8",
+                  "$ref": "#/definitions/serviceBooleanOption",
+                  "x-intellij-html-description": "Autowiring automatically injects dependencies for this service.<br><a href='https://symfony.com/doc/current/service_container/autowiring.html'>Symfony Documentation</a><br><i><a href='https://symfony.com/blog/new-in-symfony-2-8-service-auto-wiring'>Since Symfony 2.8</a></i>"
+                },
+                "autoconfigure": {
+                  "$comment": "Since Symfony 3.3",
+                  "$ref": "#/definitions/serviceBooleanOption",
+                  "x-intellij-html-description": "Autoconfigure automatically tags this service based on interface implementations.<br><a href='https://symfony.com/doc/current/service_container.html#the-autoconfigure-option'>Symfony Documentation</a><br><i><a href='https://symfony.com/blog/new-in-symfony-3-3-service-autoconfiguration'>Since Symfony 3.3</a></i>"
+                },
+                "lazy": {
+                  "$comment": "Since Symfony 2.3",
+                  "$ref": "#/definitions/serviceBooleanOption",
+                  "title": "boolean",
+                  "x-intellij-html-description": "Define service as lazy. This injects a 'proxy' instead of the original instance to lazy load it.<br><a href='https://symfony.com/doc/current/service_container/lazy_services.html'>Symfony Documentation</a><br><i><a href='https://symfony.com/blog/new-in-symfony-2-3-what-else#lazy-services'>Since Symfony 2.3</a></i>"
+                },
+                "abstract": {
+                  "$ref": "#/definitions/serviceBooleanOption"
+                },
+                "scope": {
+                  "type": "string",
+                  "enum": ["container", "prototype", "request"],
+                  "deprecationMessage": "Since Symfony 2.8. Use 'shared' option instead.",
+                  "title": "string",
+                  "x-intellij-html-description": "Service scopes control how long an instance of a service is used by the container.<br><a href='http://symfony.com/doc/2.8/cookbook/service_container/scopes.html'>Symfony Documentation</a><br><i><a href='https://symfony.com/blog/new-in-symfony-2-8-deprecating-scopes-and-introducing-shared-services'>Deprecated since Symfony 2.8</a></i>"
+                },
+                "shared": {
+                  "$ref": "#/definitions/serviceBooleanOption"
+                },
+                "synthetic": {
+                  "$ref": "#/definitions/serviceBooleanOption",
+                  "title": "string",
+                  "x-intellij-html-description": "Allows setting service instance at runtime by <code>$container->set(...)</code>.<br><a href='https://symfony.com/doc/current/service_container/synthetic_services.html'>Symfony Documentation</a>"
+                },
+                "synchronized": {
+                  "type": ["boolean", "string"],
+                  "deprecationMessage": "Since Symfony 2.7.",
+                  "title": "boolean",
+                  "x-intellij-html-description": "Allows service to depend on services from a narrower scope.<br><i>Since Symfony 2.3</i><br><i><a href='https://symfony.com/blog/new-in-symfony-2-7-dependency-injection-improvements'>Deprecated since Symfony 2.7</a></i>"
+                },
+                "deprecated": {
+
+                },
+                "tags": {
+                  "$ref": "#/definitions/serviceTags"
+                },
+                "arguments": {
+                  "$ref": "#/definitions/serviceArguments"
+                },
+                "properties": {
+                  "$ref": "#/definitions/serviceProperties"
+                },
+                "class": {
+                  "$comment": "Since Symfony 3.3: optional for named services",
+                  "type": "string",
+                  "title": "string",
+                  "x-intellij-html-description": "Specifies class for this service.<br><a href='https://symfony.com/doc/current/service_container.html#explicitly-configuring-services-and-arguments'>Symfony Documentation</a>"
+                },
+                "parent": {
+                  "type": "string"
+                },
+                "decorates": {
+                  "type": "string"
+                },
+                "file": {
+                  "type": "string"
+                },
+                "autowiring_types": {
+                  "type": "string",
+                  "deprecationMessage": "Since Symfony 3.3. Use simple service aliases instead.",
+                  "title": "string",
+                  "x-intellij-html-description": "Defines default implementation to use for this service.<br><i>Since Symfony 2.8</i><br><i>Deprecated <a href='https://symfony.com/blog/new-in-symfony-3-3-deprecated-the-autowiring-types'>since Symfony 3.3</a></i>"
+                },
+                "resource": {
+                  "$comment": "Since Symfony 3.3",
+                  "type": "string",
+                  "title": "string",
+                  "x-intellij-html-description": "Specifies a file path (glob pattern) for automatic service loading. This allows importing many services at once.<br>Example:<br><code>resource: '../src/Domain/*'</code><br><a href='https://symfony.com/doc/master/service_container.html#importing-many-services-at-once-with-resource'>Symfony Documentation</a><br><i><a href='https://symfony.com/doc/master/service_container/3.3-di-changes.html#services-are-loaded-automatically'>Since Symfony 3.3</a></i>"
+                },
+                "exclude": {
+                  "$comment": "Since Symfony 3.3",
+                  "type": "string",
+                  "title": "string",
+                  "x-intellij-html-description": "Excludes a file path (glob pattern) from automatic service loading.<br>Example:<br><code>resource: '../src/Domain/*'<br>exclude: '../src/Domain/{Entity,Migrations,Tests}'</code><br><a href='https://symfony.com/doc/master/service_container.html#importing-many-services-at-once-with-resource'>Symfony Documentation</a><br><i><a href='https://symfony.com/doc/master/service_container/3.3-di-changes.html#services-are-loaded-automatically'>Since Symfony 3.3</a> </i>"
+                },
+                "namespace": {
+                  "$comment": "Since Symfony 3.3",
+                  "type": "string",
+                  "title": "string",
+                  "x-intellij-html-description": "Specifies namespace for multiple service definitions (automatic service loading).<br><a href='https://symfony.com/doc/current/service_container.html#multiple-service-definitions-using-the-same-namespace'>Symfony Documentation</a>"
+                },
+                "factory": {
+                  "$ref": "#/definitions/serviceCallable",
+                  "$comment": "Since Symfony 2.6"
+                },
+                "configurator": {
+                  "$ref": "#/definitions/serviceCallable",
+                  "$comment": "Since Symfony 3.2: added short syntax (https://symfony.com/blog/new-in-symfony-3-2-dx-improvements#added-a-short-syntax-for-service-configurators)"
+                },
+                "calls": {
+                  "$ref": "#/definitions/serviceMethodCalls"
+                },
+                "decoration_inner_name": {
+                  "type": "string"
+                },
+                "decoration_priority": {
+                  "$comment": "Since Symfony 2.8",
+                  "type": "integer",
+                  "title": "integer",
+                  "x-intellij-html-description": "Allows to define the priority of service decoration.<br><a href='https://symfony.com/doc/current/service_container/service_decoration.html'>Symfony Documentation</a><br><i><a href='https://symfony.com/blog/new-in-symfony-2-8-dependencyinjection-improvements'>Since Symfony 2.8</a></i>"
+                },
+                "factory_service": {
+                  "type": "string",
+                  "deprecationMessage": "Since Symfony 2.6. Use 'factory' instead."
+                },
+                "factory_class": {
+                  "type": "string",
+                  "deprecationMessage": "Since Symfony 2.6. Use 'factory' instead."
+                },
+                "factory_method": {
+                  "type": "string",
+                  "deprecationMessage": "Since Symfony 2.6. Use 'factory' instead."
+                }
+              },
+              "dependencies": {
+                "decoration_inner_name": ["decorates"],
+                "decoration_priority": ["decorates"],
+                "namespace": ["resource"],
+                "exclude": ["resource"]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "additionalProperties": false,
+  "required": ["services"]
+}
